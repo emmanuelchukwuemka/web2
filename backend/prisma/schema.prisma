@@ -1,0 +1,165 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ── Tokens launched on the bonding curve ─────────────────────────────────────
+
+model Token {
+  id            Int       @id @default(autoincrement())
+  address       String    @unique
+  name          String
+  symbol        String
+  creator       String
+  bondingCurve  String    @unique
+  blockNumber   Int
+  txHash        String
+  createdAt     DateTime
+
+  graduated     Boolean   @default(false)
+  graduatedAt   DateTime?
+
+  // Stored as decimal strings to avoid BigInt serialisation issues
+  croReserves   String    @default("0")
+  tokenReserves String    @default("0")
+  realCroRaised String    @default("0")
+  currentPrice  String    @default("0")
+
+  // Off-chain metadata (set by creator after launch)
+  image         String?
+  description   String?
+  website       String?
+  twitter       String?
+  telegram      String?
+  discord       String?
+
+  // Moderation
+  featured      Boolean   @default(false)
+  featuredAt    DateTime?
+  hidden        Boolean   @default(false)
+  flagged       Boolean   @default(false)
+  flagReason    String?
+
+  trades        Trade[]
+  comments      Comment[]
+  holders       TokenHolder[]
+
+  @@index([creator])
+  @@index([graduated])
+  @@index([createdAt])
+  @@index([featured])
+  @@index([hidden])
+}
+
+// ── Individual buy / sell events ──────────────────────────────────────────────
+
+model Trade {
+  id          Int      @id @default(autoincrement())
+  tokenAddr   String
+  curveAddr   String
+  trader      String
+  isBuy       Boolean
+  tokenAmount String
+  croAmount   String
+  fee         String
+  price       String
+  txHash      String
+  blockNumber Int
+  timestamp   DateTime
+
+  token       Token    @relation(fields: [tokenAddr], references: [address])
+
+  @@index([tokenAddr])
+  @@index([curveAddr])
+  @@index([trader])
+  @@index([timestamp])
+}
+
+// ── Token holder balances (updated from Transfer events) ─────────────────────
+
+model TokenHolder {
+  id        Int      @id @default(autoincrement())
+  tokenAddr String
+  holder    String
+  balance   String   @default("0")
+  updatedAt DateTime @updatedAt
+
+  token     Token    @relation(fields: [tokenAddr], references: [address])
+
+  @@unique([tokenAddr, holder])
+  @@index([tokenAddr])
+  @@index([holder])
+}
+
+// ── Comments on token pages ───────────────────────────────────────────────────
+
+model Comment {
+  id        Int       @id @default(autoincrement())
+  tokenAddr String
+  author    String    // wallet address
+  content   String
+  parentId  Int?
+  parent    Comment?  @relation("replies", fields: [parentId], references: [id])
+  replies   Comment[] @relation("replies")
+  createdAt DateTime  @default(now())
+
+  token     Token     @relation(fields: [tokenAddr], references: [address])
+
+  @@index([tokenAddr])
+  @@index([author])
+  @@index([parentId])
+}
+
+// ── NFT collections deployed via NFTFactory ───────────────────────────────────
+
+model NFTCollection {
+  id          Int      @id @default(autoincrement())
+  address     String   @unique
+  name        String
+  symbol      String
+  creator     String
+  maxSupply   Int
+  blockNumber Int
+  txHash      String
+  createdAt   DateTime
+
+  @@index([creator])
+  @@index([createdAt])
+}
+
+// ── Staking contract events ───────────────────────────────────────────────────
+
+model StakingEvent {
+  id          Int      @id @default(autoincrement())
+  user        String?
+  from        String?
+  eventType   String
+  amount      String
+  txHash      String
+  blockNumber Int
+  timestamp   DateTime
+
+  @@index([user])
+  @@index([eventType])
+  @@index([timestamp])
+}
+
+// ── Admin blocklisted wallets ─────────────────────────────────────────────────
+
+model BlockedWallet {
+  address   String   @id
+  reason    String?
+  blockedBy String
+  blockedAt DateTime @default(now())
+}
+
+// ── Indexer cursor ────────────────────────────────────────────────────────────
+
+model IndexerState {
+  key   String @id
+  value String
+}
