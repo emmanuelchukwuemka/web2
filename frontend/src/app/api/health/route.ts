@@ -2,7 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const raw = process.env.BACKEND_URL ?? "NOT SET";
-  const backend = raw.startsWith("http") ? raw : `https://${raw}`;
+  const withProtocol = raw.startsWith("http") ? raw : `https://${raw}`;
+  const backend = withProtocol.includes(".") ? withProtocol : `${withProtocol}.onrender.com`;
   const testUrl = `${backend}/api/tokens`;
 
   let status = "unknown";

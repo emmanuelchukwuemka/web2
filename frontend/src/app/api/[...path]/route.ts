@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 
 const raw = process.env.BACKEND_URL ?? "http://localhost:3001";
-const BACKEND = raw.startsWith("http") ? raw : `https://${raw}`;
+const withProtocol = raw.startsWith("http") ? raw : `https://${raw}`;
+// If it looks like just a Render service name (no dots), append .onrender.com
+const BACKEND = withProtocol.includes(".") ? withProtocol : `${withProtocol}.onrender.com`;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
