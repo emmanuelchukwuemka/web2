@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const BACKEND = process.env.BACKEND_URL ?? "http://localhost:3001";
+const raw = process.env.BACKEND_URL ?? "http://localhost:3001";
+const BACKEND = raw.startsWith("http") ? raw : `https://${raw}`;
 
 async function proxy(req: NextRequest, path: string) {
   const search = req.nextUrl.search ?? "";
