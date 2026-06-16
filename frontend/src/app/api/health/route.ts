@@ -1,7 +1,20 @@
 import { NextResponse } from "next/server";
 
 export async function GET() {
-  const backend = process.env.BACKEND_URL ?? "NOT SET";
-  const masked = backend === "NOT SET" ? "NOT SET" : backend;
-  return NextResponse.json({ backend_url: masked });
+  const raw = process.env.BACKEND_URL ?? "NOT SET";
+  const backend = raw.startsWith("http") ? raw : `https://${raw}`;
+  const testUrl = `${backend}/api/tokens`;
+
+  let status = "unknown";
+  let error = "";
+
+  try {
+    const res = await fetch(testUrl, { signal: AbortSignal.timeout(10000) });
+    status = `${res.status} ${res.statusText}`;
+  } catch (e: unknown) {
+    status = "failed";
+    error = e instanceof Error ? e.message : String(e);
+  }
+
+  return NextResponse.json({ raw_env: raw, resolved_url: backend, test_url: testUrl, backend_status: status, error });
 }
