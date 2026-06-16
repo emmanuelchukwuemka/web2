@@ -58,18 +58,6 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
-      # Private — used by Next.js rewrites (server-side proxy to backend)
-      - key: BACKEND_URL
-        fromService:
-          name: nwo-backend
-          type: web
-          property: host
-      # Public — used for WebSocket connection
-      - key: NEXT_PUBLIC_BACKEND_URL
-        fromService:
-          name: nwo-backend
-          type: web
-          property: host
       - key: NEXT_PUBLIC_CHAIN_ID
         value: "25"
       - key: NEXT_PUBLIC_CONTROLLER_ADDRESS
@@ -82,6 +70,10 @@ services:
         value: ""
       - key: NEXT_PUBLIC_WOLF_ADDRESS
         value: ""
+      - key: BACKEND_URL
+        sync: false
+      - key: NEXT_PUBLIC_BACKEND_URL
+        sync: false
       - key: NEXT_PUBLIC_PINATA_JWT
         sync: false
       - key: NEXT_PUBLIC_ADMIN_SECRET

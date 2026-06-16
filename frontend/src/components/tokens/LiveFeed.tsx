@@ -17,7 +17,8 @@ interface LiveEvent {
   timestamp: Date;
 }
 
-const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
+const rawBackend = process.env.NEXT_PUBLIC_BACKEND_URL ?? "http://localhost:3001";
+const backendUrl = rawBackend.startsWith("http") ? rawBackend : `https://${rawBackend}`;
 const WS_URL = backendUrl.replace(/^https/, "wss").replace(/^http/, "ws") + "/ws";
 
 export function LiveFeed() {
