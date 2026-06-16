@@ -1,4 +1,7 @@
-const BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+// Server-side: call backend directly. Client-side: relative URL goes through Next.js rewrite.
+const BASE = typeof window === "undefined"
+  ? (process.env.BACKEND_URL ?? "http://localhost:3001")
+  : "";
 
 // ── Shared types ──────────────────────────────────────────────────────────────
 
