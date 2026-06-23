@@ -1,7 +1,8 @@
 import { Suspense } from "react";
 import Link from "next/link";
-import { Zap, TrendingUp, Layers, Users, ArrowRight, Shield, Rocket } from "lucide-react";
+import { Zap, TrendingUp, Users, ArrowRight, Shield, Rocket, BarChart2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { PageSpinner } from "@/components/ui/spinner";
 import { TokenGrid } from "@/components/tokens/TokenGrid";
 import { LiveFeed } from "@/components/tokens/LiveFeed";
@@ -9,31 +10,31 @@ import { fetchTokens, type Token } from "@/lib/api";
 
 async function StatsRow() {
   let totalTokens = 0;
-  let graduated = 0;
+  let graduated   = 0;
   try {
     const r = await fetchTokens({ limit: 1 });
     totalTokens = r.total;
     const g = await fetchTokens({ limit: 1, graduated: true });
     graduated = g.total;
-  } catch { /* backend not yet running */ }
+  } catch { /* backend offline */ }
 
   const stats = [
-    { label: "Tokens Launched", value: totalTokens.toLocaleString(), icon: Zap,        color: "text-accent-purple" },
-    { label: "Graduated",       value: graduated.toLocaleString(),    icon: TrendingUp, color: "text-accent-green"  },
-    { label: "On Cronos",       value: "Cronos EVM",                  icon: Layers,     color: "text-accent-cyan"   },
-    { label: "Active Traders",  value: "—",                           icon: Users,      color: "text-accent-amber"  },
+    { label: "Tokens Launched", value: totalTokens.toLocaleString() || "—", icon: Rocket,      accent: "text-gold"             },
+    { label: "Graduated",       value: graduated.toLocaleString()   || "—", icon: TrendingUp,  accent: "text-accent-green-light" },
+    { label: "Network",         value: "Cronos EVM",                        icon: BarChart2,   accent: "text-accent-cyan"       },
+    { label: "Active Traders",  value: "—",                                 icon: Users,       accent: "text-accent-purple-light" },
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      {stats.map(({ label, value, icon: Icon, color }) => (
-        <div key={label} className="stat-card flex items-center gap-4">
-          <div className={`rounded-lg bg-bg-primary p-2.5 ${color}`}>
-            <Icon size={18} />
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      {stats.map(({ label, value, icon: Icon, accent }) => (
+        <div key={label} className="rounded-2xl border border-border/60 bg-bg-card p-4 flex items-center gap-3">
+          <div className={`shrink-0 rounded-xl bg-bg-elevated p-2.5 ${accent}`}>
+            <Icon size={16} />
           </div>
-          <div>
-            <p className="text-sm text-text-muted">{label}</p>
-            <p className="text-lg font-bold text-text-primary">{value}</p>
+          <div className="min-w-0">
+            <p className="text-[11px] uppercase tracking-widest text-text-muted mb-0.5">{label}</p>
+            <p className="text-base font-bold text-text-primary truncate">{value}</p>
           </div>
         </div>
       ))}
@@ -46,29 +47,32 @@ async function TrendingTokens() {
   try {
     const r = await fetchTokens({ limit: 12, sort: "realCroRaised", order: "desc", graduated: false });
     tokens = r.data;
-  } catch { /* backend not yet running */ }
+  } catch { /* backend offline */ }
   return <TokenGrid tokens={tokens} />;
 }
 
 export default function HomePage() {
   return (
     <>
-      {/* ── Hero ────────────────────────────────────────────────────────────── */}
-      <section className="relative overflow-hidden min-h-[88vh] flex items-center">
+      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
 
-        {/* Animated background blobs */}
+        {/* Background atmosphere */}
         <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-[-10%] left-[-5%] h-[500px] w-[500px] rounded-full bg-accent-purple/20 blur-[120px] animate-pulse" style={{ animationDuration: "4s" }} />
-          <div className="absolute bottom-[-5%] right-[-5%] h-[450px] w-[450px] rounded-full bg-accent-cyan/15 blur-[120px] animate-pulse" style={{ animationDuration: "6s" }} />
-          <div className="absolute top-[40%] left-[50%] h-[300px] w-[300px] rounded-full bg-accent-purple/10 blur-[80px] animate-pulse" style={{ animationDuration: "5s" }} />
+          {/* Gold upper-left orb */}
+          <div className="absolute -top-20 -left-20 h-[500px] w-[500px] rounded-full bg-gold/8 blur-[140px]" />
+          {/* Gold lower-right orb */}
+          <div className="absolute bottom-0 right-0 h-[400px] w-[400px] rounded-full bg-gold/6 blur-[120px]" />
+          {/* Purple mid accent */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-[300px] w-[300px] rounded-full bg-accent-purple/8 blur-[100px]" />
         </div>
 
-        {/* Grid overlay */}
+        {/* Dot-grid overlay */}
         <div
-          className="absolute inset-0 pointer-events-none opacity-[0.04]"
+          className="absolute inset-0 pointer-events-none opacity-[0.035]"
           style={{
-            backgroundImage: "linear-gradient(rgba(139,92,246,1) 1px, transparent 1px), linear-gradient(90deg, rgba(139,92,246,1) 1px, transparent 1px)",
-            backgroundSize: "60px 60px",
+            backgroundImage: "radial-gradient(circle, #F59E0B 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
           }}
         />
 
@@ -77,173 +81,175 @@ export default function HomePage() {
 
             {/* Left — copy */}
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-accent-purple/30 bg-accent-purple/8 px-4 py-1.5 text-sm text-accent-purple-light mb-8">
-                <span className="h-1.5 w-1.5 rounded-full bg-accent-green animate-pulse" />
+              {/* Live pill */}
+              <div className="inline-flex items-center gap-2 rounded-full border border-gold/20 bg-gold/6 px-4 py-1.5 text-sm font-medium text-gold mb-8">
+                <span className="live-dot" />
                 Live on Cronos EVM
               </div>
 
-              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight leading-[1.05] mb-6">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tighter leading-[1.0] mb-6">
                 Launch the{" "}
                 <span className="gradient-text">Next</span>
-                <br />
+                <br className="hidden sm:block" />
+                {" "}
                 <span className="gradient-text">Moonshot</span>
               </h1>
 
-              <p className="text-lg text-text-secondary mb-10 max-w-lg leading-relaxed">
-                Fair-launch tokens and NFTs on Cronos with bonding curves, instant liquidity,
-                and automatic DEX graduation. No presales. No rugs. No BS.
+              <p className="text-lg text-text-secondary leading-relaxed mb-10 max-w-lg">
+                Fair-launch tokens on Cronos with bonding curves, instant liquidity,
+                and automatic DEX graduation. No presales. No rugs. Just pure market mechanics.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-4 mb-12">
+              <div className="flex flex-col sm:flex-row gap-3 mb-12">
                 <Link href="/launch">
-                  <Button size="lg" className="w-full sm:w-auto gap-2 text-base px-8">
-                    <Rocket size={18} />
+                  <Button size="lg" className="w-full sm:w-auto gap-2 px-8 text-[15px] font-bold">
+                    <Rocket size={17} />
                     Launch a Token
                   </Button>
                 </Link>
                 <Link href="/tokens">
-                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 text-base px-8">
+                  <Button size="lg" variant="outline" className="w-full sm:w-auto gap-2 px-8 text-[15px]">
                     Explore Tokens
-                    <ArrowRight size={16} />
+                    <ArrowRight size={15} />
                   </Button>
                 </Link>
               </div>
 
-              {/* Trust badges */}
-              <div className="flex flex-wrap gap-6 text-sm text-text-muted">
+              {/* Trust row */}
+              <div className="flex flex-wrap gap-5 text-sm text-text-muted">
                 {[
-                  { icon: Shield, text: "Anti-rug protection" },
-                  { icon: Zap,    text: "Instant liquidity"   },
-                  { icon: TrendingUp, text: "Auto DEX listing" },
+                  { icon: Shield,    text: "Anti-rug protection" },
+                  { icon: Zap,       text: "Instant liquidity"   },
+                  { icon: Lock,      text: "Audited contracts"   },
                 ].map(({ icon: Icon, text }) => (
                   <div key={text} className="flex items-center gap-1.5">
-                    <Icon size={14} className="text-accent-purple" />
-                    {text}
+                    <Icon size={13} className="text-gold" />
+                    <span>{text}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right — animated card visual */}
+            {/* Right — mock trading card */}
             <div className="hidden lg:flex items-center justify-center">
               <div className="relative w-[380px]">
 
-                {/* Floating glow behind card */}
-                <div className="absolute inset-0 rounded-3xl bg-accent-purple/20 blur-2xl scale-110" />
+                {/* Glow halo */}
+                <div className="absolute inset-[-20px] rounded-3xl bg-gold/8 blur-3xl" />
 
-                {/* Main card */}
-                <div className="relative rounded-2xl border border-border bg-bg-card/80 backdrop-blur-xl p-5 shadow-xl">
+                {/* Card */}
+                <div className="relative rounded-2xl border border-gold/15 bg-bg-card/90 backdrop-blur-xl p-5 shadow-[0_0_60px_rgba(0,0,0,0.6),0_0_30px_rgba(245,158,11,0.06)]">
 
-                  {/* Card header */}
+                  {/* Token header */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-accent-purple to-accent-cyan flex items-center justify-center font-bold text-white text-sm">
-                        NWO
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-gold-dark to-gold flex items-center justify-center font-black text-black text-sm shadow-gold-sm">
+                        N
                       </div>
                       <div>
-                        <p className="font-semibold text-text-primary text-sm">New Wolf Order</p>
+                        <p className="font-bold text-text-primary text-sm">New Wolf Order</p>
                         <p className="text-xs text-text-muted">$NWO</p>
                       </div>
                     </div>
-                    <span className="text-xs font-medium text-accent-green bg-accent-green/10 rounded-full px-2.5 py-1">
-                      +142%
-                    </span>
+                    <Badge variant="green" className="text-[11px]">+142%</Badge>
                   </div>
 
-                  {/* Fake chart */}
-                  <div className="h-28 w-full mb-4 relative overflow-hidden rounded-xl bg-bg-primary">
+                  {/* Chart */}
+                  <div className="h-28 w-full mb-4 rounded-xl bg-bg-surface overflow-hidden">
                     <svg viewBox="0 0 300 80" className="w-full h-full" preserveAspectRatio="none">
                       <defs>
-                        <linearGradient id="chartGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#8b5cf6" stopOpacity="0.4" />
-                          <stop offset="100%" stopColor="#8b5cf6" stopOpacity="0" />
+                        <linearGradient id="g1" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%"   stopColor="#F59E0B" stopOpacity="0.35" />
+                          <stop offset="100%" stopColor="#F59E0B" stopOpacity="0"    />
                         </linearGradient>
                       </defs>
                       <path
-                        d="M0,70 L30,65 L60,55 L90,60 L120,45 L150,40 L180,30 L210,25 L240,15 L270,10 L300,5 L300,80 L0,80 Z"
-                        fill="url(#chartGrad)"
+                        d="M0,72 L40,68 L80,58 L110,62 L140,48 L170,38 L200,28 L230,18 L260,10 L300,4 L300,80 L0,80 Z"
+                        fill="url(#g1)"
                       />
                       <path
-                        d="M0,70 L30,65 L60,55 L90,60 L120,45 L150,40 L180,30 L210,25 L240,15 L270,10 L300,5"
-                        fill="none"
-                        stroke="#8b5cf6"
-                        strokeWidth="2"
-                        strokeLinecap="round"
+                        d="M0,72 L40,68 L80,58 L110,62 L140,48 L170,38 L200,28 L230,18 L260,10 L300,4"
+                        fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round"
                       />
                     </svg>
                   </div>
 
-                  {/* Progress bar */}
+                  {/* Progress */}
                   <div className="mb-4">
-                    <div className="flex justify-between text-xs text-text-muted mb-1.5">
-                      <span>Bonding progress</span>
-                      <span className="text-accent-purple-light font-medium">68%</span>
+                    <div className="flex justify-between text-[11px] text-text-muted mb-1.5">
+                      <span className="flex items-center gap-1"><TrendingUp size={9} /> Bonding curve</span>
+                      <span className="text-gold font-semibold">68%</span>
                     </div>
-                    <div className="h-2 rounded-full bg-bg-primary overflow-hidden">
-                      <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-accent-purple to-accent-cyan" />
+                    <div className="h-1.5 rounded-full bg-bg-elevated overflow-hidden">
+                      <div className="h-full w-[68%] rounded-full bg-gradient-to-r from-gold-dark to-gold" />
                     </div>
                   </div>
 
                   {/* Buy/Sell */}
                   <div className="grid grid-cols-2 gap-2">
-                    <button className="rounded-xl bg-accent-green/10 border border-accent-green/20 py-2.5 text-sm font-semibold text-accent-green hover:bg-accent-green/20 transition-colors">
+                    <button className="rounded-xl bg-accent-green/10 border border-accent-green/20 py-2.5 text-sm font-bold text-accent-green-light hover:bg-accent-green/20 transition-colors">
                       Buy
                     </button>
-                    <button className="rounded-xl bg-accent-red/10 border border-accent-red/20 py-2.5 text-sm font-semibold text-accent-red hover:bg-accent-red/20 transition-colors">
+                    <button className="rounded-xl bg-accent-red/10 border border-accent-red/20 py-2.5 text-sm font-bold text-accent-red hover:bg-accent-red/20 transition-colors">
                       Sell
                     </button>
                   </div>
                 </div>
 
-                {/* Floating trade notification */}
-                <div className="absolute -bottom-4 -left-8 rounded-xl border border-border bg-bg-elevated/90 backdrop-blur-sm px-3.5 py-2.5 shadow-lg animate-bounce" style={{ animationDuration: "3s" }}>
+                {/* Floating notification — buy */}
+                <div className="absolute -bottom-5 -left-10 rounded-xl border border-border bg-bg-elevated/95 backdrop-blur-sm px-3.5 py-2.5 shadow-lg" style={{ animation: "float 3s ease-in-out infinite" }}>
                   <div className="flex items-center gap-2">
                     <span className="h-2 w-2 rounded-full bg-accent-green" />
-                    <span className="text-xs font-medium text-text-primary">0x3f…ab12 bought</span>
+                    <span className="text-xs text-text-secondary">0x3f…b12 bought</span>
                     <span className="text-xs font-bold text-accent-green">+500 CRO</span>
                   </div>
                 </div>
 
-                {/* Floating badge */}
-                <div className="absolute -top-4 -right-6 rounded-xl border border-accent-purple/30 bg-accent-purple/10 backdrop-blur-sm px-3.5 py-2 shadow-lg animate-bounce" style={{ animationDuration: "4s", animationDelay: "1s" }}>
+                {/* Floating badge — launched */}
+                <div className="absolute -top-5 -right-8 rounded-xl border border-gold/25 bg-gold/8 backdrop-blur-sm px-3 py-2 shadow-lg" style={{ animation: "float 4s ease-in-out infinite 1s" }}>
                   <div className="flex items-center gap-1.5">
-                    <Rocket size={12} className="text-accent-purple" />
-                    <span className="text-xs font-semibold text-accent-purple-light">Just launched!</span>
+                    <Rocket size={12} className="text-gold" />
+                    <span className="text-xs font-semibold text-gold">Just launched!</span>
                   </div>
                 </div>
 
               </div>
             </div>
+
           </div>
         </div>
 
         {/* Bottom fade */}
-        <div className="absolute bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-bg-primary to-transparent pointer-events-none" />
+        <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-bg-base to-transparent pointer-events-none" />
       </section>
 
-      {/* ── Stats ───────────────────────────────────────────────────────────── */}
-      <section className="page-container pb-8">
-        <Suspense fallback={<div className="h-24 rounded-xl bg-bg-card animate-pulse" />}>
+      {/* ── Stats ────────────────────────────────────────────────────────────── */}
+      <section className="page-container pb-10">
+        <Suspense fallback={<div className="h-20 rounded-2xl bg-bg-card animate-pulse" />}>
           <StatsRow />
         </Suspense>
       </section>
 
-      {/* ── How it works ────────────────────────────────────────────────────── */}
+      {/* ── How it works ─────────────────────────────────────────────────────── */}
       <section className="page-container pb-16">
-        <h2 className="section-title text-center mb-2">How it works</h2>
-        <p className="text-center text-text-muted text-sm mb-8">Three steps to launch your token</p>
+        <div className="text-center mb-10">
+          <Badge variant="gold" className="mb-4">How it works</Badge>
+          <h2 className="text-3xl font-black tracking-tight text-text-primary">
+            Three steps to the moon
+          </h2>
+        </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { step: "01", icon: Rocket,     title: "Launch",   desc: "Fill in your token details and pay a small creation fee. Your token goes live instantly on the bonding curve." },
-            { step: "02", icon: TrendingUp, title: "Trade",    desc: "Anyone can buy and sell on the bonding curve. Price rises with each buy — early holders benefit most." },
-            { step: "03", icon: Zap,        title: "Graduate", desc: "Once 500 CRO is raised, liquidity is automatically added to VVS Finance. Your token is now a real DEX pair." },
+            { step: "02", icon: TrendingUp, title: "Trade",    desc: "Anyone can buy and sell on the bonding curve. Price rises with each buy — early holders benefit most."         },
+            { step: "03", icon: Zap,        title: "Graduate", desc: "Once 500 CRO is raised, liquidity is automatically seeded on VVS Finance. Your token becomes a real DEX pair." },
           ].map(({ step, icon: Icon, title, desc }) => (
-            <div key={step} className="relative rounded-2xl border border-border bg-bg-card p-6 overflow-hidden group hover:border-accent-purple/40 transition-colors">
-              <div className="absolute top-4 right-4 text-5xl font-black text-text-muted/8 select-none">{step}</div>
-              <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-accent-purple/10">
-                <Icon size={18} className="text-accent-purple" />
+            <div key={step} className="relative rounded-2xl border border-border bg-bg-card p-6 overflow-hidden group hover:border-gold/20 hover:shadow-card-hover transition-all duration-300">
+              <div className="absolute top-4 right-4 text-6xl font-black text-text-primary/[0.03] select-none leading-none">{step}</div>
+              <div className="mb-4 inline-flex h-11 w-11 items-center justify-center rounded-xl bg-gold/10 border border-gold/15">
+                <Icon size={18} className="text-gold" />
               </div>
-              <h3 className="font-semibold text-text-primary mb-2">{title}</h3>
+              <h3 className="font-bold text-text-primary mb-2 text-base">{title}</h3>
               <p className="text-sm text-text-muted leading-relaxed">{desc}</p>
             </div>
           ))}
@@ -254,13 +260,15 @@ export default function HomePage() {
       <section className="page-container pb-16">
         <div className="flex flex-col xl:flex-row gap-6">
           <div className="flex-1 min-w-0">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="section-title flex items-center gap-2">
-                <TrendingUp size={18} className="text-accent-purple" />
-                Trending Now
-              </h2>
-              <Link href="/tokens" className="text-sm text-text-muted hover:text-accent-purple-light transition-colors">
-                View all →
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold/10 border border-gold/15">
+                  <TrendingUp size={14} className="text-gold" />
+                </div>
+                <h2 className="text-lg font-bold text-text-primary">Trending Now</h2>
+              </div>
+              <Link href="/tokens" className="flex items-center gap-1 text-sm text-text-muted hover:text-gold transition-colors">
+                View all <ArrowRight size={13} />
               </Link>
             </div>
             <Suspense fallback={<PageSpinner />}>
@@ -269,31 +277,35 @@ export default function HomePage() {
           </div>
 
           <div className="w-full xl:w-80 shrink-0">
-            <h2 className="section-title flex items-center gap-2 mb-5">
-              <span className="h-2 w-2 rounded-full bg-accent-green animate-pulse" />
-              Live Trades
-            </h2>
+            <div className="flex items-center gap-2.5 mb-6">
+              <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent-green/10 border border-accent-green/15">
+                <span className="h-2 w-2 rounded-full bg-accent-green" />
+              </div>
+              <h2 className="text-lg font-bold text-text-primary">Live Trades</h2>
+            </div>
             <LiveFeed />
           </div>
         </div>
       </section>
 
-      {/* ── CTA Banner ──────────────────────────────────────────────────────── */}
+      {/* ── CTA Banner ───────────────────────────────────────────────────────── */}
       <section className="page-container pb-20">
-        <div className="relative overflow-hidden rounded-3xl border border-accent-purple/20 bg-gradient-to-br from-accent-purple/10 via-bg-card to-accent-cyan/5 p-10 text-center">
+        <div className="relative overflow-hidden rounded-3xl border border-gold/15 bg-gradient-to-br from-gold/6 via-bg-card to-bg-surface p-12 text-center">
+          {/* Glow */}
           <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-40 w-80 rounded-full bg-accent-purple/20 blur-3xl" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 h-48 w-72 rounded-full bg-gold/12 blur-3xl" />
           </div>
           <div className="relative">
-            <h2 className="text-3xl font-extrabold text-text-primary mb-3">
+            <Badge variant="gold" className="mb-6">New Wolf Order</Badge>
+            <h2 className="text-3xl sm:text-4xl font-black tracking-tight text-text-primary mb-4">
               Ready to launch your token?
             </h2>
-            <p className="text-text-muted mb-8 max-w-md mx-auto">
-              Join the N.W.O ecosystem. Fair launches, real liquidity, zero presale.
+            <p className="text-text-muted text-base mb-8 max-w-md mx-auto leading-relaxed">
+              Join the N.W.O ecosystem. Fair launches, real liquidity, zero presale garbage.
             </p>
             <Link href="/launch">
-              <Button size="lg" className="gap-2 px-10 text-base">
-                <Rocket size={18} />
+              <Button size="lg" className="gap-2 px-10 text-[15px] font-bold">
+                <Rocket size={17} />
                 Get Started Now
               </Button>
             </Link>
