@@ -20,9 +20,9 @@ export function TokenCard({ token }: TokenCardProps) {
 
         {/* Top image / banner */}
         <div className="relative h-32 bg-bg-surface overflow-hidden">
-          {token.imageUrl ? (
+          {token.image ? (
             <Image
-              src={token.imageUrl}
+              src={token.image}
               alt={token.name}
               fill
               className="object-cover transition-transform duration-500 group-hover:scale-105"
